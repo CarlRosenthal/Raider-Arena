@@ -1,4 +1,4 @@
-// Six pairs, countdown, matching rules, and card artwork.
+// Four to eight pairs, countdown, matching rules, and card artwork.
 const ICON_NAMES = [
   "FOOTBALL",
   "BASKETBALL",
@@ -6,6 +6,8 @@ const ICON_NAMES = [
   "TROPHY",
   "WHISTLE",
   "LIGHTNING",
+  "SOCCER",
+  "VOLLEYBALL",
 ];
 function icon(id, x, y, s = 1) {
   ctx.save();
@@ -128,14 +130,21 @@ function icon(id, x, y, s = 1) {
       ]),
     );
   }
+  if (id === 6) soccerBall(0, 0, 1.3);
+  if (id === 7) volleyball(0, 0, 1.3);
   ctx.restore();
 }
+function memoryPairs() {
+  return phase === "ready" ? prefs.memory.pairs : roundConfig.pairs;
+}
 function cardRect(i) {
+  const rows = Math.ceil((memoryPairs() * 2) / 4),
+    h = Math.min(185, 490 / rows - 18);
   return {
     x: 182 + (i % 4) * 315,
-    y: 335 + Math.floor(i / 4) * 151,
+    y: 335 + Math.floor(i / 4) * (h + 18),
     w: 291,
-    h: 132,
+    h,
   };
 }
 function drawMemory() {
@@ -150,13 +159,13 @@ function drawMemory() {
         ? "PERFECT MATCH, RAIDERS!"
         : "TIME'S UP!"
       : ready
-        ? "SIX PAIRS. ONE SHOT."
+        ? `${memoryPairs()} PAIRS. ONE SHOT.`
         : "FIND YOUR NEXT MATCH.",
     55,
     264,
     29,
   );
-  pill(`${count} / 6 PAIRS`, 1075, 247, 205, "#303843");
+  pill(`${count} / ${memoryPairs()} PAIRS`, 1075, 247, 205, "#303843");
   rect(1300, 240, 245, 55, remaining <= 10000 && !ready ? C.red : "#303843", 4);
   text(`${(remaining / 1000).toFixed(1)}s`, 1422, 269, 32, C.white, "center");
   rect(55, 312, 1490, 4, "#3d4653");
@@ -167,7 +176,7 @@ function drawMemory() {
     4,
     remaining <= 10000 && !ready ? C.red : C.white,
   );
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < memoryPairs() * 2; i++) {
     const { x, y, w, h } = cardRect(i),
       matched = memory.matched.includes(i),
       face = !ready && (matched || memory.open.includes(i) || result);
@@ -204,8 +213,7 @@ function drawMemory() {
     ctx.lineWidth = matched ? 3 : 1.5;
     ctx.strokeRect(2, 2, w - 4, h - 4);
     if (show) {
-      icon(memory.deck[i], w / 2, 51, 0.75);
-      text(ICON_NAMES[memory.deck[i]], w / 2, 110, 15, C.white, "center");
+      icon(memory.deck[i], w / 2, h / 2, Math.min(0.9, h / 150));
       if (matched) {
         pill("OK", w - 45, 10, 33, "#526174");
       }
@@ -219,38 +227,13 @@ function drawMemory() {
         "#9e1023",
       );
       line(0, h - 5, w, h - 5, "#960f24", 2);
-      logo("wr", w / 2 - 40, 16, 80, 64);
-      text("RAIDER NATION", w / 2, 108, 13, C.silver, "center");
+      logo("wr", w / 2 - 45, h / 2 - 32, 90, 64);
     }
-    rect(10, 10, 38, 27, show ? "#0b0f15" : C.red, 3);
-    text(String(i + 1), 29, 24, 17, C.white, "center");
+    rect(10, 10, 52, 40, show ? "#0b0f15" : C.red, 3);
+    text(String(i + 1), 36, 31, 28, C.white, "center");
     ctx.restore();
   }
-  if (result) {
-    text(
-      memory.won
-        ? `${memory.turns} TURNS / ${(memory.remaining / 1000).toFixed(1)} SECONDS TO SPARE`
-        : `${count} OF 6 PAIRS MATCHED`,
-      800,
-      803,
-      19,
-      C.silver,
-      "center",
-    );
-    if (memory.won) confetti();
-  } else
-    text(
-      digits
-        ? `CARD ${digits} / ENTER TO FLIP`
-        : ready
-          ? `${prefs.memory.memory} SECONDS / 12 CARDS`
-          : `${memory.turns} ${memory.turns === 1 ? "TURN" : "TURNS"}`,
-      800,
-      803,
-      18,
-      C.silver,
-      "center",
-    );
+  if (result && memory.won) confetti();
 }
 
 function gameReset() {
@@ -262,21 +245,24 @@ function gameReset() {
     total: prefs.memory.memory * 1000,
     closeAt: null,
     turns: 0,
-    flipAt: Array(12).fill(-1000),
+    flipAt: Array(prefs.memory.pairs * 2).fill(-1000),
   };
 }
 function gameStart() {
   picked = null;
   const total = roundConfig.memory * 1000;
   memory = {
-    deck: shuffled([0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]),
+    deck: shuffled(
+      Array.from({ length: roundConfig.pairs }, (_, i) => [i, i]).flat(),
+    ),
     matched: [],
     open: [],
     remaining: total,
     total,
     closeAt: null,
     turns: 0,
-    flipAt: Array(12).fill(-1000),
+    flipAt: Array(roundConfig.pairs * 2).fill(-1000),
+    lastClickSecond: Math.ceil(total / 1000),
     won: false,
   };
   phaseTo("playing");
@@ -284,7 +270,7 @@ function gameStart() {
 function gamePick(index) {
   if (
     phase !== "playing" ||
-    index >= 12 ||
+    index >= memory.deck.length ||
     memory.remaining <= 0 ||
     memory.open.length === 2 ||
     memory.matched.includes(index) ||
@@ -302,7 +288,7 @@ function gamePick(index) {
       memory.open = [];
       memory.closeAt = null;
       ping(880, 0.1);
-      if (memory.matched.length === 12) {
+      if (memory.matched.length === memory.deck.length) {
         memory.won = true;
         phaseTo("result");
       }
@@ -313,6 +299,12 @@ function gamePick(index) {
 function gameTick() {
   if (phase === "playing") {
     memory.remaining = Math.max(0, memory.total - elapsed);
+    const second = Math.ceil(memory.remaining / 1000);
+    if (second !== memory.lastClickSecond) {
+      if (roundConfig.timerClick && second > 0)
+        tone(second <= 10 ? 1400 : 1000, 0.035, 0, "triangle", 0.04);
+      memory.lastClickSecond = second;
+    }
     if (memory.closeAt !== null && elapsed >= memory.closeAt) {
       memory.open = [];
       memory.closeAt = null;
@@ -328,15 +320,15 @@ function gameTick() {
 function gameStatus() {
   return phase === "result"
     ? memory.won
-      ? "All six pairs matched!"
-      : `Time up. ${memory.matched.length / 2} of 6 pairs.`
-    : `${memory.matched.length / 2}/6 pairs | ${(memory.remaining / 1000).toFixed(1)}s${digits ? " | Card " + digits + " + Enter" : ""}`;
+      ? `All ${memoryPairs()} pairs matched!`
+      : `Time up. ${memory.matched.length / 2} of ${memoryPairs()} pairs.`
+    : `${memory.matched.length / 2}/${memoryPairs()} pairs | ${(memory.remaining / 1000).toFixed(1)}s${digits ? " | Card " + digits + " + Enter" : ""}`;
 }
 function gameDetail() {
-  return `6 pairs / ${prefs.memory.memory}s / ${prefs.memory.hold}ms mismatch`;
+  return `${prefs.memory.pairs} pairs / ${prefs.memory.memory}s / ${prefs.memory.hold}ms mismatch`;
 }
 function gameCanvasPick(x, y) {
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < memoryPairs() * 2; i++) {
     const c = cardRect(i);
     if (x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h) pick(i);
   }

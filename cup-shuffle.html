@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Cup Shuffle | Raider Arena</title>
+    <title>Cup Shuffle</title>
     <meta
       name="description"
       content="Cup Shuffle — Lincoln High School Raider Arena game-night challenge."
@@ -13,6 +13,7 @@
     <script defer src="assets/js/config.js"></script>
     <script defer src="assets/js/drawing.js"></script>
     <script defer src="assets/js/sports.js"></script>
+    <script defer src="assets/js/audio.js"></script>
     <script defer src="assets/js/engine.js"></script>
     <script defer src="assets/js/controls.js"></script>
     <script defer src="assets/js/games/cup-shuffle.js"></script>
@@ -34,7 +35,7 @@
     <div id="toast" role="status"></div>
     <dialog id="help">
       <button id="closeHelp" style="float: right">Close</button>
-      <h2>Raider Arena</h2>
+      <h2>Cup Shuffle</h2>
       <p>
         Open this game in Edge or Chrome. Use the Game hub to choose another
         game. You can also download the entire project and open index.html for
@@ -44,18 +45,20 @@
         display.
       </p>
       <p>
-        <b>Space</b> starts, reveals, or starts the next round.
-        <b>1 / 2 / 3</b> picks a cup, helmet, or race lane. In Memory Match,
-        type <b>1-12 then Enter</b>, or click a card. <b>P</b> pauses,
-        <b>R</b> resets, <b>O</b> opens the operator window, <b>H</b> hides
-        controls, and <b>?</b> opens help. Backspace clears a typed card number.
+        <b>Space</b> starts, reveals, or starts the next round. <b>1–5</b> picks
+        a cup; <b>1–3</b> picks a helmet or race lane. In Memory Match, type
+        <b>1–16 then Enter</b>, or use the large card grid in the operator
+        window. <b>P</b> pauses, <b>R</b> resets, <b>O</b> opens the operator
+        window, <b>H</b> hides controls, and <b>?</b> opens help. Backspace
+        clears a typed card number.
       </p>
       <p>
-        <b>Tuning:</b> Presets and sliders apply to the current game, between
-        rounds. Cups and helmets use faster continuous motion, varying swap
-        times, and three-way moves at higher settings. The hidden ball always
-        follows the same physical object. Race winners are random and equally
-        likely; race pace changes duration, not winning odds.
+        <b>Tuning:</b> Cup Shuffle offers 3–5 cups and normal, football, soccer,
+        or volleyball styles. Presets and sliders apply to the current game,
+        between rounds. Cups and helmets use faster continuous motion, varying
+        swap times, and three-way moves at higher settings. The hidden ball
+        always follows the same physical object. Race winners are random and
+        equally likely; race pace changes duration, not winning odds.
       </p>
       <table>
         <thead>
@@ -107,17 +110,19 @@
       </table>
       <p>
         Shuffle times vary and accelerate during the round. Impossible is a
-        novelty challenge, with extremely fast motion. Memory always has six
-        pairs; its clock begins at Start, and higher presets shorten the time
-        and mismatch display. Matched cards stay visible. At zero, inputs lock
-        and unmatched cards are revealed.
+        novelty challenge, with extremely fast motion. Memory has 4–8
+        customizable pairs and a clock up to 120 seconds; its clock begins at
+        Start, and higher presets shorten the time and mismatch display. Matched
+        cards stay visible. At zero, inputs lock and unmatched cards are
+        revealed.
       </p>
       <p>
         Switching games or resetting a running round asks for confirmation.
         Minimizing the board or hiding its browser tab pauses play; moving focus
-        to the operator window does not. Sounds are optional and off by default.
-        Rehearse fullscreen and the operator window on your actual video-board
-        system before the event.
+        to the operator window does not. Game sounds are on by default and can
+        be muted in Tuning. The optional timer click is off by default; enable
+        it in Memory Match Tuning. Rehearse fullscreen and the operator window
+        on your actual video-board system before the event.
       </p>
     </dialog>
   </body>

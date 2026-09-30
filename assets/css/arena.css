@@ -300,3 +300,33 @@ canvas:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: -2px;
 }
+
+/* Match the audience card positions for fast operator selection. */
+.pickers.memory-pickers,
+.op .pickers.memory-pickers {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: min(100%, 480px);
+}
+.memory-pickers button {
+  min-height: 48px;
+  font-size: 22px;
+}
+.op .pickers.memory-pickers {
+  width: 100%;
+}
+.op .memory-pickers button {
+  min-height: 64px;
+  font-size: 28px;
+}
+.memory-pickers button.active:disabled {
+  background: #244d37;
+  border-color: #65c18e;
+  opacity: 0.8;
+}
+.memory-pickers button.open-card:disabled {
+  border-color: #f0bb62;
+  background: #5e4620;
+  opacity: 0.85;
+}

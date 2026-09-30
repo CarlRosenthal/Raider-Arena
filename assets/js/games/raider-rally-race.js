@@ -1,9 +1,12 @@
 // Three lanes, random winners, race timing, and car artwork.
 function raceProgress(id) {
   if (["ready", "countdown"].includes(phase)) return 0;
-  const t = Math.min(1, elapsed / race.finish[id]);
+  const t = Math.min(1, elapsed / race.duration);
+  const rank = race.order.indexOf(id);
+  // Preserve the close early race, then open a visible final-stretch lead.
+  const lead = rank * 0.14 * t ** 3;
   return clamp(
-    t + 0.047 * Math.sin(t * Math.PI) * Math.sin(t * 12 + race.waves[id]),
+    t - lead + 0.02 * Math.sin(t * Math.PI) * Math.sin(t * 12 + race.waves[id]),
   );
 }
 function car(x, y, id, scale = 1) {
@@ -41,9 +44,9 @@ function car(x, y, id, scale = 1) {
       [-87, -6],
     ],
     gradient(0, -77, 0, 0, [
-      [0, id === 0 ? "#ff7180" : "#ffffff"],
+      [0, id === 0 ? "#ff7180" : id === 2 ? "#a5afbc" : "#ffffff"],
       [0.4, color],
-      [1, id === 0 ? "#950b20" : "#6e7889"],
+      [1, id === 0 ? "#950b20" : id === 2 ? "#424e60" : "#6e7889"],
     ]),
   );
   poly(
@@ -97,7 +100,7 @@ function drawRace() {
     ready = phase === "ready";
   banner(
     result
-      ? `${TEAMS[race.winner]} TAKES THE CHECKERED FLAG!`
+      ? `WINNER: ${TEAMS[race.winner]} • LANE ${race.winner + 1}`
       : ready
         ? "CHOOSE YOUR LANE. BACK YOUR TEAM."
         : phase === "countdown"
@@ -127,7 +130,11 @@ function drawRace() {
     rect(55, y, 6, 128, COLORS[i]);
     text(String(i + 1), 90, y + 46, 33, COLORS[i], "center");
     text(TEAMS[i], 126, y + 46, 25, COLORS[i]);
-    if (picked === i) text("YOUR PICK", 126, y + 84, 13, C.red);
+    if (result && i === race.winner) {
+      ctx.strokeStyle = "#ffd775";
+      ctx.lineWidth = 5;
+      ctx.strokeRect(57, y + 2, 1486, 124);
+    }
     for (let x = 276; x < 1400; x += 94) {
       line(x, y + 117, x + 48, y + 117, "#8a929d55", 2);
       line(x, y + 12, x + 48, y + 12, "#8a929d22", 1);
@@ -148,10 +155,10 @@ function drawRace() {
       const place = race.order.indexOf(i) + 1;
       pill(
         place === 1 ? "WINNER" : place === 2 ? "2ND" : "3RD",
-        1000,
-        y + 44,
-        180,
-        place === 1 ? C.red : "#444d5a",
+        75,
+        y + 80,
+        150,
+        place === 1 ? "#a87513" : "#444d5a",
       );
     }
   }
@@ -186,8 +193,7 @@ function gameStart() {
     winner: order[0],
   };
   order.forEach(
-    (id, rank) =>
-      (race.finish[id] = duration + rank * Math.min(380, duration * 0.025)),
+    (id, rank) => (race.finish[id] = duration + rank * duration * 0.14),
   );
   phaseTo("countdown");
 }
@@ -203,8 +209,8 @@ function gameTick() {
     phaseTo("racing");
     ping(1000, 0.2);
   }
-  if (phase === "racing" && elapsed >= Math.max(...race.finish)) {
-    elapsed = Math.max(...race.finish);
+  if (phase === "racing" && elapsed >= race.duration) {
+    elapsed = race.duration;
     phaseTo("result");
   }
 }

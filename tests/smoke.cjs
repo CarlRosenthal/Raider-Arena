@@ -173,6 +173,87 @@ const base = (process.env.BASE_URL || "http://localhost:8000").replace(
           throw Error("Unable to complete memory");
       });
     }
+    await page.evaluate(() => raiderTest.reset());
+    await page.locator('[data-role="tune"]').click();
+    if (game === "cups") {
+      await page.locator('[data-setting-input="cups"]').selectOption("5");
+      await page
+        .locator('[data-setting-input="ball"]')
+        .selectOption("volleyball");
+      assert.equal(
+        await page.locator('[data-role="pickers"] button').count(),
+        5,
+      );
+      await page.locator('[data-role="advance"]').click();
+      await page.evaluate(() => raiderTest.tick(60000));
+      await page.keyboard.press("5");
+      // Select the numbered button too; focus on a select intentionally disables shortcuts.
+      await page.getByRole("button", { name: "Choice 5", exact: true }).click();
+      assert.equal(await page.evaluate(() => raiderTest.snapshot().picked), 4);
+      await page.evaluate(() => {
+        raiderTest.advance();
+        raiderTest.tick(751);
+      });
+      assert.equal(
+        await page.evaluate(() => raiderTest.snapshot().phase),
+        "result",
+      );
+    }
+    if (game === "memory") {
+      await page.locator('[data-setting-input="pairs"]').selectOption("8");
+      await page.locator('[data-setting-input="memory"]').focus();
+      await page.keyboard.press("End");
+      await page
+        .locator('[data-setting-input="timerClick"]')
+        .selectOption("true");
+      assert.equal(
+        await page.locator('[data-setting-input="memory"]').inputValue(),
+        "120",
+      );
+      assert.equal(
+        await page.locator('[data-role="pickers"] button').count(),
+        16,
+      );
+      await page.locator('[data-role="advance"]').click();
+      await page.getByRole("button", { name: "Card 16", exact: true }).click();
+      assert.deepEqual(
+        await page.evaluate(() => raiderTest.snapshot().memory.open),
+        [15],
+      );
+      assert.equal(
+        await page.evaluate(() => raiderTest.snapshot().memory.total),
+        120000,
+      );
+      const panel = await page
+        .locator('[data-role="pickers"]')
+        .evaluate((el) => ({
+          columns: getComputedStyle(el).gridTemplateColumns.split(" ").length,
+          height: el.children[0].getBoundingClientRect().height,
+        }));
+      assert.equal(panel.columns, 4);
+      assert.ok(panel.height >= 48);
+      await page.evaluate(() => raiderTest.tick(1001));
+      assert.equal(await page.evaluate(() => memory.lastClickSecond), 119);
+    }
+    if (game === "race") {
+      await page.locator('[data-role="advance"]').click();
+      await page.waitForFunction(() => audio?.state === "running");
+      await page.evaluate(() => raiderTest.tick(3000));
+      assert.equal(await page.evaluate(() => engineSound !== null), true);
+      await page.locator('[data-role="pause"]').click();
+      assert.equal(await page.evaluate(() => engineSound === null), true);
+      await page.locator('[data-role="pause"]').click();
+      assert.equal(await page.evaluate(() => engineSound !== null), true);
+      await page.locator('[data-role="sound"]').uncheck();
+      assert.equal(await page.evaluate(() => engineSound === null), true);
+      await page.locator('[data-role="sound"]').check();
+      await page.evaluate(() => raiderTest.tick(60000));
+      assert.equal(await page.evaluate(() => engineSound === null), true);
+      assert.ok(
+        await page.evaluate(() => soundVoices.size > 3),
+        "Winner fanfare is scheduled",
+      );
+    }
     await page.evaluate(() => {
       raiderTest.reset();
       raiderTest.changePreset("elite");
@@ -190,7 +271,33 @@ const base = (process.env.BASE_URL || "http://localhost:8000").replace(
     await page.locator('[data-role="operator"]').click();
     const popup = await popupPromise;
     await popup.waitForLoadState();
+    if (game === "memory") {
+      assert.equal(
+        await popup.locator('[data-role="pickers"] button').count(),
+        16,
+      );
+      assert.equal(
+        await popup.locator('[data-setting-input="pairs"]').inputValue(),
+        "8",
+      );
+      assert.equal(
+        await popup.locator('[data-setting-input="timerClick"]').inputValue(),
+        "true",
+      );
+    }
     await popup.locator('[data-role="advance"]').click();
+    if (game === "memory") {
+      await popup.getByRole("button", { name: "Card 16", exact: true }).click();
+      assert.deepEqual(
+        await page.evaluate(() => raiderTest.snapshot().memory.open),
+        [15],
+      );
+      if (process.env.SCREENSHOT_DIR)
+        await popup.screenshot({
+          path: process.env.SCREENSHOT_DIR + "/memory-operator.png",
+          fullPage: true,
+        });
+    }
     assert.notEqual(
       await page.evaluate(() => raiderTest.snapshot().phase),
       "ready",

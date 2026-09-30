@@ -38,6 +38,7 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("resize", resize);
 window.addEventListener("beforeunload", () => {
+  stopSounds();
   if (operator && !operator.closed) operator.close();
 });
 reset();
@@ -77,7 +78,6 @@ if (new URLSearchParams(location.search).has("test"))
         JSON.stringify({
           game,
           phase,
-          round,
           paused,
           elapsed,
           visualTime,

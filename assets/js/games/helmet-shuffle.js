@@ -13,10 +13,10 @@ function helmetShape(x, y, s = 1) {
   ctx.lineTo(40, 73);
   ctx.closePath();
   ctx.fillStyle = gradient(-100, -120, 92, 85, [
-    [0, "#ff7280"],
-    [0.22, "#f52039"],
-    [0.62, "#c20b25"],
-    [1, "#5d0011"],
+    [0, "#ffffff"],
+    [0.22, "#f6f7fa"],
+    [0.62, "#d9dfe7"],
+    [1, "#909baa"],
   ]);
   ctx.fill();
   ctx.strokeStyle = "#d8dce4";
@@ -29,7 +29,7 @@ function helmetShape(x, y, s = 1) {
   ctx.lineWidth = 8;
   ctx.stroke();
   rect(-77, -81, 111, 77, "#050607", 6);
-  logo("raider", -73, -78, 103, 71);
+  logo("wr", -73, -78, 103, 71);
   ctx.strokeStyle = "#6f7b8d";
   ctx.lineWidth = 13;
   ctx.beginPath();

@@ -13,7 +13,7 @@ Four Lincoln High School crowd games, split from the original Raider-Arena.html 
 
 `index.html` is the game-selection hub. Every game has a direct link, its own page, and an operator popup. Cup and helmet games share their shuffle rules to keep ball tracking consistent.
 
-The original artwork, three race lanes, six memory pairs, optional sounds, saved settings, and all six presets are retained. Memory Match defaults to **30 seconds at Varsity**. Higher difficulty presets and tuning intentionally change its time limit. Impossible remains a novelty challenge.
+Cup Shuffle supports **3–5 cups** and **normal, football, soccer, or volleyball** styles. Helmet Shuffle uses **white WR helmets**. Raider Rally Race has **three lanes**, engine sounds, and a finish-line freeze with a clear winning lead. Memory Match supports **4–8 pairs**, a **6–120 second clock**, large numbered controls arranged like the board, and an optional ticking sound. All six difficulty presets and saved settings are retained. Memory Match defaults to **30 seconds at Varsity**. Higher difficulty presets and tuning intentionally change its time limit. Impossible remains a novelty challenge.
 
 ## Host with GitHub Pages
 
@@ -45,36 +45,39 @@ Open <http://localhost:8000>. Serving the files also gives consistent browser st
 
 Open a game, click **Operator window**, and move the game board to the venue display using extended displays. Keep the operator popup on your control monitor. Allow popups for the site if prompted.
 
-| Key              | Action                           |
-| ---------------- | -------------------------------- |
-| Space            | Start, reveal, or next round     |
-| 1 / 2 / 3        | Pick a cup, helmet, or race lane |
-| 1–12, then Enter | Select a Memory Match card       |
-| P                | Pause / resume                   |
-| R                | Reset                            |
-| O                | Open operator window             |
-| F                | Fullscreen                       |
-| H                | Hide / show controls             |
-| ?                | Help                             |
+| Key              | Action                            |
+| ---------------- | --------------------------------- |
+| Space            | Start, reveal, or next round      |
+| 1–5              | Pick a cup (1–3 for helmets/race) |
+| 1–16, then Enter | Select a Memory Match card        |
+| P                | Pause / resume                    |
+| R                | Reset                             |
+| O                | Open operator window              |
+| F                | Fullscreen                        |
+| H                | Hide / show controls              |
+| ?                | Help                              |
+
+Use **Tuning** to adjust the new options between rounds. Cup count, ball style, pair count, and timer-click preference stay selected when changing difficulty presets. The **Game sounds** checkbox controls all audio and is on by default; Memory Match ticking is separately enabled and defaults to off. Sound starts after the first operator action. Pause, reset, mute, and race completion stop engine audio.
 
 Mouse/touch controls work too. Switching games during play asks before ending the round. Hiding the board's browser tab pauses play; operator-window focus alone does not pause it. Rehearse on the actual display before an event.
 
 ## Where to edit
 
-| Change                                               | File                                             |
-| ---------------------------------------------------- | ------------------------------------------------ |
-| Hub wording and game links                           | `index.html`                                     |
-| Hub appearance                                       | `assets/css/hub.css`                             |
-| Difficulty presets and slider limits                 | `assets/js/config.js`                            |
-| Per-game rules, artwork, and board text              | `assets/js/games/`                               |
-| Shared cup/helmet tracking and shuffle logic         | `assets/js/games/shell.js`                       |
-| Common board header, footer, colors used by drawings | `assets/js/drawing.js` and `assets/js/config.js` |
-| Operator controls and keyboard shortcuts             | `assets/js/controls.js`                          |
-| Shared round lifecycle, settings persistence         | `assets/js/engine.js`                            |
-| Canvas resizing and animation loop                   | `assets/js/boot.js`                              |
-| Control panel styling                                | `assets/css/arena.css`                           |
-| Original logos and hub previews                      | `assets/images/`                                 |
-| Help instructions and script loading order           | Each game HTML page                              |
+| Change                                            | File                                             |
+| ------------------------------------------------- | ------------------------------------------------ |
+| Hub wording and game links                        | `index.html`                                     |
+| Hub appearance                                    | `assets/css/hub.css`                             |
+| Difficulty presets and slider limits              | `assets/js/config.js`                            |
+| Per-game rules, artwork, and board text           | `assets/js/games/`                               |
+| Shared cup/helmet tracking and shuffle logic      | `assets/js/games/shell.js`                       |
+| Common board header, confetti, and drawing colors | `assets/js/drawing.js` and `assets/js/config.js` |
+| Operator controls and keyboard shortcuts          | `assets/js/controls.js`                          |
+| Sound effects, fanfare, and car engine audio      | `assets/js/audio.js`                             |
+| Shared round lifecycle, settings persistence      | `assets/js/engine.js`                            |
+| Canvas resizing and animation loop                | `assets/js/boot.js`                              |
+| Control panel styling                             | `assets/css/arena.css`                           |
+| Original logos and hub previews                   | `assets/images/`                                 |
+| Help instructions and script loading order        | Each game HTML page                              |
 
 Edit the desired file in GitHub with the pencil button, then commit the change. Start with a branch and pull request for larger changes. No compile or bundle command is needed. Scripts use ordered `defer` loading and shared globals so local `file://` playback remains available; keep `boot.js` last. Each page loads only its own game implementation, plus the shared files.
 
@@ -82,7 +85,7 @@ Settings already saved by a browser override new default presets until the opera
 
 ## Verification
 
-The initial refactor passed `tests/logic.cjs`, which runs the actual game scripts in a simulated DOM with a native canvas renderer. It verifies all six presets, startup, pause, ball tracking, race completion, memory wins/timeouts, saved preferences, popup control wiring, and relative links. The rendered boards were also inspected. Full browser checks were prepared but could not run in the authoring environment because browser startup was restricted; fullscreen, popup behavior, and responsive layout still need an actual-browser check.
+`tests/logic.cjs` runs the actual game scripts in a simulated DOM with a native canvas renderer. It verifies all six presets, 3–5 cup tracking with all ball styles, 4–8 balanced memory pairs, card 16 selection, 120-second expiry, wins, race forward motion and final separation, saved preferences, popup control wiring, and relative links. Rendered boards are also inspected. `tests/smoke.cjs` checks actual Chromium behavior, including popup selection, responsive layouts, settings, engine audio lifecycle, and fanfare scheduling.
 
 ```sh
 npm install --no-save jsdom @napi-rs/canvas

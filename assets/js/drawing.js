@@ -70,7 +70,7 @@ function base() {
     0,
     115,
     1600,
-    715,
+    785,
     gradient(0, 115, 0, 830, [
       [0, "#171b20"],
       [0.55, "#0d1014"],
@@ -102,42 +102,47 @@ function base() {
   rect(0, 0, 1600, 7, C.red);
   rect(0, 7, 1600, 109, "#060708");
   logo("wr", 55, 24, 108, 77);
-  text("LINCOLN HIGH SCHOOL", 185, 48, 25);
-  text("WISCONSIN RAPIDS  /  RED RAIDERS", 185, 82, 16, C.silver);
-  pill("RAIDER ARENA", 1300, 32, 245);
+  text("LINCOLN HIGH SCHOOL", 185, 62, 27);
+  text(titlesafe(), 1545, 62, 38, C.white, "right");
   line(55, 115, 1545, 115, "#454950", 1);
-  text(titlesafe(), 55, 172, 46);
-  rect(55, 211, 70, 4, C.red);
-  const name = presetName();
-  pill(name, 1295, 146, 250, name === "IMPOSSIBLE" ? "#9c0e1d" : "#30353c");
-  text(
-    `ROUND ${String(round).padStart(2, "0")}`,
-    1545,
-    205,
-    17,
-    C.silver,
-    "right",
-  );
-  rect(0, 832, 1600, 68, "#060708");
-  line(55, 832, 1545, 832, C.red, 2);
-  text("RAIDER NATION", 55, 866, 19);
-  text("RED. WHITE. RAIDER PRIDE.", 1545, 866, 17, C.silver, "right");
 }
 function titlesafe() {
   return GAMES[game];
 }
-function banner(main, sub = "") {
-  text(main, 800, 261, 32, C.white, "center");
-  if (sub) text(sub, 800, 300, 18, C.silver, "center", 400);
+function banner(main) {
+  text(main, 800, 245, 36, C.white, "center");
+}
+let confettiParticles = [],
+  confettiStart = 0;
+function resetConfetti() {
+  confettiStart = visualTime;
+  confettiParticles = Array.from({ length: 145 }, () => ({
+    x: Math.random() * 1600,
+    y: 100 + Math.random() * 250,
+    vx: (Math.random() - 0.5) * 360,
+    vy: -80 - Math.random() * 260,
+    gravity: 110 + Math.random() * 130,
+    delay: Math.random() * 0.8,
+    spin: (Math.random() - 0.5) * 12,
+    sway: 10 + Math.random() * 50,
+    seed: Math.random() * Math.PI * 2,
+    size: 5 + Math.random() * 8,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+  }));
 }
 function confetti() {
-  for (let i = 0; i < 55; i++) {
-    const x = (i * 263 + Math.sin(i) * 90) % 1600,
-      y = ((i * 127 + visualTime * 0.1) % 690) + 125;
+  const seconds = (visualTime - confettiStart) / 1000;
+  for (const p of confettiParticles) {
+    const t = seconds - p.delay;
+    if (t < 0) continue;
+    const x = p.x + p.vx * t + p.sway * Math.sin(t * 3 + p.seed),
+      y = p.y + p.vy * t + 0.5 * p.gravity * t * t;
+    if (y > 930 || x < -40 || x > 1640) continue;
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(i + visualTime * 0.0015);
-    rect(-3, -5, 6, 11, COLORS[i % 3]);
+    ctx.rotate(p.seed + p.spin * t);
+    ctx.scale(1, 0.25 + 0.75 * Math.abs(Math.cos(p.seed + t * 5)));
+    rect(-p.size / 2, -p.size / 3, p.size, p.size * 0.65, p.color, 1);
     ctx.restore();
   }
 }

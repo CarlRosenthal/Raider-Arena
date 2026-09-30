@@ -36,7 +36,8 @@ function cupShape(x, y, s = 1) {
   ellipse(0, -222, 76, 11, "#c6162b");
   ellipse(0, -224, 63, 6, "#ff4b5c");
   ctx.beginPath();
-  ctx.ellipse(0, -8, 123, 21, 0, 0, Math.PI * 2);
+  // Only the front rim is visible on an upside-down cup resting flat.
+  ctx.ellipse(0, -8, 123, 21, 0, 0, Math.PI);
   ctx.strokeStyle = "#dce2ea";
   ctx.lineWidth = 7;
   ctx.stroke();

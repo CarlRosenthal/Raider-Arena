@@ -5,7 +5,7 @@ const canvas = document.getElementById("board"),
 const C = {
   red: "#ed182e",
   white: "#f7f8fa",
-  silver: "#b7bec9",
+  silver: "#8893a3",
   black: "#08090b",
   line: "#393e46",
 };
@@ -87,12 +87,21 @@ const SLIDERS = {
   moves: [6, 60],
   show: [400, 3000],
   race: [3, 45],
-  memory: [6, 60],
+  memory: [6, 120],
+  cups: [3, 5],
+  pairs: [4, 8],
   hold: [80, 1200],
 };
 let prefs = {};
 for (const g of Object.keys(GAMES))
-  prefs[g] = { ...PRESETS.varsity, preset: "varsity" };
+  prefs[g] = {
+    ...PRESETS.varsity,
+    preset: "varsity",
+    cups: 3,
+    pairs: 6,
+    ball: "normal",
+    timerClick: false,
+  };
 try {
   const saved = JSON.parse(localStorage.getItem("raider-arena-v2"));
   for (const g of Object.keys(GAMES)) {
@@ -102,6 +111,9 @@ try {
       if (Number.isFinite(v[k]))
         prefs[g][k] = Math.round(Math.max(min, Math.min(max, v[k])));
     }
+    if (["normal", "football", "soccer", "volleyball"].includes(v.ball))
+      prefs[g].ball = v.ball;
+    if (typeof v.timerClick === "boolean") prefs[g].timerClick = v.timerClick;
     if (typeof v.chaos === "boolean") prefs[g].chaos = v.chaos;
     if (v.preset in PRESETS) prefs[g].preset = v.preset;
     else prefs[g].preset = "custom";
@@ -109,7 +121,6 @@ try {
 } catch {}
 const game = document.body.dataset.game;
 let phase = "ready",
-  round = 1,
   paused = false,
   elapsed = 0,
   visualTime = 0,
@@ -125,7 +136,7 @@ let shell = {},
   digits = "",
   digitAt = 0,
   toastTimer,
-  sound = false,
+  sound = true,
   audio = null;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)),
   ease = (t) => t * t * (3 - 2 * t);

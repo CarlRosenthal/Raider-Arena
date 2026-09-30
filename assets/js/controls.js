@@ -41,6 +41,9 @@ function symbol(name) {
 function slider(key, label, min, max, step) {
   return `<div class="setting" data-setting="${key}"><label>${label} <output data-output="${key}"></output></label><input aria-label="${label}" data-setting-input="${key}" type="range" min="${min}" max="${max}" step="${step}"></div>`;
 }
+function choiceSetting(key, label, choices) {
+  return `<div class="setting" data-setting="${key}"><label>${label}</label><select data-setting-input="${key}" aria-label="${label}">${choices.map(([value, title]) => `<option value="${value}">${title}</option>`).join("")}</select></div>`;
+}
 function makeControls(doc, mount, isOperator = false) {
   mount.innerHTML = `<div class="row games"><div class="row"><button data-role="home">← Game hub</button>${Object.entries(
     GAMES,
@@ -57,7 +60,29 @@ function makeControls(doc, mount, isOperator = false) {
     .map(([id, p]) => `<option value="${id}">${p.name}</option>`)
     .join(
       "",
-    )}<option value="custom" disabled>Custom</option></select><button data-role="tune" title="Adjust speed and difficulty">${symbol("tune")} Tuning</button><span data-role="detail" class="muted"></span></div></div><div class="row actions"><div class="tools"><button class="primary" data-role="advance">Start round</button><button data-role="pause">Pause</button><button data-role="reset">Reset</button>${isOperator ? "" : `<button data-role="operator">Operator window</button><button data-role="full" title="Fullscreen (F)" aria-label="Fullscreen">${symbol("full")}</button><button data-role="hide" title="Hide controls (H)" aria-label="Hide controls">${symbol("hide")}</button><button data-role="help" title="Help (?)" aria-label="Help">${symbol("help")}</button>`}</div><div class="pickers" data-role="pickers"></div><div class="status" data-role="message" aria-live="polite"></div></div><div class="tuning" data-role="tuning" ${isOperator ? "" : "hidden"}>${slider("swap", "Base swap time (ms)", 60, 1200, 5)}${slider("moves", "Shuffle moves", 6, 60, 1)}${slider("show", "Ball preview (ms)", 400, 3000, 100)}<div class="setting" data-setting="chaos"><label>Movement</label><select data-setting-input="chaos" aria-label="Shuffle movement"><option value="false">Two-object swaps</option><option value="true">Include three-way moves</option></select></div>${slider("race", "Race duration (seconds)", 3, 45, 1)}${slider("memory", "Memory clock (seconds)", 6, 60, 1)}${slider("hold", "Mismatch display (ms)", 80, 1200, 10)}<div class="setting"><label class="audio"><input type="checkbox" data-role="sound"> Game sounds</label><span class="muted">Changes apply to the next round.</span></div></div>`;
+    )}<option value="custom" disabled>Custom</option></select><button data-role="tune" title="Adjust speed and difficulty">${symbol("tune")} Tuning</button><span data-role="detail" class="muted"></span></div></div><div class="row actions"><div class="tools"><button class="primary" data-role="advance">Start round</button><button data-role="pause">Pause</button><button data-role="reset">Reset</button>${isOperator ? "" : `<button data-role="operator">Operator window</button><button data-role="full" title="Fullscreen (F)" aria-label="Fullscreen">${symbol("full")}</button><button data-role="hide" title="Hide controls (H)" aria-label="Hide controls">${symbol("hide")}</button><button data-role="help" title="Help (?)" aria-label="Help">${symbol("help")}</button>`}</div><div class="pickers" data-role="pickers"></div><div class="status" data-role="message" aria-live="polite"></div></div><div class="tuning" data-role="tuning" ${isOperator ? "" : "hidden"}>${choiceSetting(
+    "cups",
+    "Number of cups",
+    [
+      [3, "3 cups"],
+      [4, "4 cups"],
+      [5, "5 cups"],
+    ],
+  )}${choiceSetting("ball", "Ball style", [
+    ["normal", "Normal ball"],
+    ["football", "Football"],
+    ["soccer", "Soccer ball"],
+    ["volleyball", "Volleyball"],
+  ])}${choiceSetting("pairs", "Memory pairs", [
+    [4, "4 pairs / 8 cards"],
+    [5, "5 pairs / 10 cards"],
+    [6, "6 pairs / 12 cards"],
+    [7, "7 pairs / 14 cards"],
+    [8, "8 pairs / 16 cards"],
+  ])}${choiceSetting("timerClick", "Timer clicking sound", [
+    ["false", "Off"],
+    ["true", "On"],
+  ])}${slider("swap", "Base swap time (ms)", 60, 1200, 5)}${slider("moves", "Shuffle moves", 6, 60, 1)}${slider("show", "Ball preview (ms)", 400, 3000, 100)}<div class="setting" data-setting="chaos"><label>Movement</label><select data-setting-input="chaos" aria-label="Shuffle movement"><option value="false">Two-object swaps</option><option value="true">Include three-way moves</option></select></div>${slider("race", "Race duration (seconds)", 3, 45, 1)}${slider("memory", "Memory clock (seconds)", 6, 120, 1)}${slider("hold", "Mismatch display (ms)", 80, 1200, 10)}<div class="setting"><label class="audio"><input type="checkbox" data-role="sound"> Game sounds</label><span class="muted">Changes apply to the next round.</span></div></div>`;
   const ui = {
     doc,
     mount,
@@ -92,6 +117,7 @@ function makeControls(doc, mount, isOperator = false) {
     );
   ui.get("sound").onchange = (e) => {
     sound = e.target.checked;
+    if (!sound) stopSounds();
     ping(600, 0.08);
     sync();
   };
@@ -105,6 +131,8 @@ function makeControls(doc, mount, isOperator = false) {
   return ui;
 }
 function sync() {
+  if (paused) stopSounds();
+  updateEngineSound();
   controls = controls.filter(
     (ui) => !ui.isOperator || (operator && !operator.closed),
   );
@@ -137,10 +165,16 @@ function sync() {
     ui.mount.querySelectorAll("[data-setting]").forEach((el) => {
       const k = el.dataset.setting;
       el.style.display = (isShell()
-        ? ["swap", "moves", "show", "chaos"]
+        ? [
+            "swap",
+            "moves",
+            "show",
+            "chaos",
+            ...(game === "cups" ? ["cups", "ball"] : []),
+          ]
         : game === "race"
           ? ["race"]
-          : ["memory", "hold"]
+          : ["memory", "hold", "pairs", "timerClick"]
       ).includes(k)
         ? ""
         : "none";
@@ -155,8 +189,10 @@ function sync() {
       .forEach(
         (el) => (el.textContent = String(prefs[game][el.dataset.output])),
       );
-    const count = game === "memory" ? 12 : 3,
+    const count =
+        game === "memory" ? memoryPairs() * 2 : isShell() ? shellCount() : 3,
       box = ui.get("pickers");
+    box.classList.toggle("memory-pickers", game === "memory");
     if (box.children.length !== count) {
       box.replaceChildren();
       for (let i = 0; i < count; i++) {
@@ -167,9 +203,18 @@ function sync() {
       }
     }
     [...box.children].forEach((b, i) => {
+      if (game === "memory") {
+        const matched = memory.matched.includes(i),
+          opened = memory.open.includes(i);
+        b.textContent = `${i + 1}${matched ? " ✓" : opened ? " •" : ""}`;
+        b.classList.toggle("open-card", opened);
+        b.setAttribute("aria-pressed", String(matched || opened));
+      }
       b.setAttribute(
         "aria-label",
-        (game === "memory" ? "Card " : "Choice ") + (i + 1),
+        (game === "memory" ? "Card " : "Choice ") +
+          (i + 1) +
+          (game === "memory" && memory.matched.includes(i) ? ", matched" : ""),
       );
       b.disabled =
         paused ||
@@ -208,9 +253,9 @@ function openOperator() {
       GAMES[game] +
       ' | Operator</title><link rel="stylesheet" href="' +
       new URL("assets/css/arena.css", document.baseURI).href +
-      '"></head><body class="op"><h1>LINCOLN / RAIDER ARENA</h1><p class="muted">' +
+      '"></head><body class="op"><h1>' +
       GAMES[game] +
-      ' / OPERATOR CONSOLE</p><section id="panel"></section><p class="muted">Space: start / reveal &nbsp; P: pause &nbsp; Memory: number + Enter</p></body></html>',
+      '</h1><p class="muted">OPERATOR CONSOLE</p><section id="panel"></section><p class="muted">Space: start / reveal &nbsp; P: pause &nbsp; Memory: number + Enter</p></body></html>',
   );
   operator.document.close();
   makeControls(
@@ -247,10 +292,11 @@ function keyDown(e) {
     if (game === "memory" && phase === "playing") {
       if (performance.now() - digitAt > 2000) digits = "";
       digits = (digits + k).slice(-2);
-      if (Number(digits) > 12) digits = k;
+      if (Number(digits) > memoryPairs() * 2) digits = k;
       digitAt = performance.now();
       sync();
-    } else if (+k >= 1 && +k <= 3) pick(+k - 1);
+    } else if (+k >= 1 && +k <= (game === "cups" ? shellCount() : 3))
+      pick(+k - 1);
   } else if (k === "backspace") {
     e.preventDefault();
     digits = "";

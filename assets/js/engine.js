@@ -28,31 +28,24 @@ function presetName() {
     ? "CUSTOM"
     : (PRESETS[p?.preset]?.name || "Varsity").toUpperCase();
 }
-function ping(freq = 600, duration = 0.08) {
-  if (!sound) return;
-  try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    audio.resume();
-    const o = audio.createOscillator(),
-      gain = audio.createGain();
-    o.type = "sine";
-    o.frequency.value = freq;
-    gain.gain.setValueAtTime(0.035, audio.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
-    o.connect(gain);
-    gain.connect(audio.destination);
-    o.start();
-    o.stop(audio.currentTime + duration);
-  } catch {}
-}
 function phaseTo(next) {
   phase = next;
   sync();
-  if (next === "result") ping(900, 0.3);
-  else if (next === "guess") ping(700, 0.18);
+  updateEngineSound();
+  if (next === "result") {
+    resetConfetti();
+    const won =
+      game === "memory"
+        ? memory.won
+        : game === "race" ||
+          picked === null ||
+          picked === shell.slots.indexOf(shell.ball);
+    celebrate(won);
+  } else if (next === "guess") ping(700, 0.18);
 }
 
 function reset() {
+  stopSounds();
   phase = "ready";
   paused = false;
   elapsed = 0;
@@ -77,26 +70,36 @@ function resetRequested() {
 }
 function changePreset(id) {
   if (active() || !(id in PRESETS)) return;
-  prefs[game] = { ...PRESETS[id], preset: id };
+  prefs[game] = { ...prefs[game], ...PRESETS[id], preset: id };
   save();
+  if (phase === "ready") gameReset();
   sync();
 }
 function tune(key, value) {
   if (active()) return;
   const p = prefs[game];
-  if (key === "chaos") p.chaos = !!value;
+  if (key === "chaos" || key === "timerClick")
+    p[key] = value === true || value === "true";
+  else if (
+    key === "ball" &&
+    ["normal", "football", "soccer", "volleyball"].includes(value)
+  )
+    p.ball = value;
   else if (key in SLIDERS) {
     const [min, max] = SLIDERS[key];
     p[key] = Math.round(clamp(Number(value) || min, min, max));
   } else return;
-  p.preset = "custom";
+  if (!["cups", "pairs", "ball", "timerClick"].includes(key))
+    p.preset = "custom";
   save();
+  if (phase === "ready") gameReset();
   sync();
 }
 
 function start() {
   if (!["ready", "result"].includes(phase)) return;
-  if (phase === "result") round++;
+  stopSounds();
+  unlockAudio();
   elapsed = 0;
   visualTime = 0;
   paused = false;
@@ -144,6 +147,7 @@ function tick(dt) {
   if (!active()) return;
   elapsed += dt;
   gameTick();
+  updateEngineSound();
 }
 function status() {
   if (paused) return "PAUSED";

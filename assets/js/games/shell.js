@@ -1,16 +1,36 @@
 // Rules and board shared by Cup Shuffle and Helmet Shuffle.
+function shellCount() {
+  return game === "cups"
+    ? phase === "ready"
+      ? prefs.cups.cups
+      : shell.slots.length
+    : 3;
+}
+function shellLayout() {
+  const count = shellCount(),
+    step = count === 3 ? 410 : count === 4 ? 350 : 290;
+  return {
+    xs: Array.from(
+      { length: count },
+      (_, i) => 800 + (i - (count - 1) / 2) * step,
+    ),
+    scale: Math.min(1, step / 380),
+  };
+}
 function makeMoves(p) {
+  const count = game === "cups" ? p.cups : 3;
   const moves = [];
   let previous = "";
   for (let i = 0; i < p.moves; i++) {
     let map, key;
     do {
-      map = [0, 1, 2];
+      map = Array.from({ length: count }, (_, i) => i);
       if (p.chaos && random(4) === 0) {
-        map = random(2) ? [1, 2, 0] : [2, 0, 1];
+        const [a, b, c] = shuffled([...map]).slice(0, 3);
+        [map[a], map[b], map[c]] = [b, c, a];
       } else {
-        const a = random(3),
-          b = (a + 1 + random(2)) % 3;
+        const a = random(count),
+          b = (a + 1 + random(count - 1)) % count;
         [map[a], map[b]] = [map[b], map[a]];
       }
       key = map.join("");
@@ -35,36 +55,27 @@ function drawShell() {
   let main =
     phase === "ready"
       ? game === "cups"
-        ? "THREE CUPS. ONE BALL."
+        ? `${shellCount()} CUPS. ONE BALL.`
         : "FOLLOW THE FOOTBALL."
       : phase === "show"
         ? "LOCK ON. DON'T LOSE IT."
         : phase === "guess"
           ? picked === null
-            ? "WHERE IS IT? 1, 2 OR 3?"
+            ? `WHERE IS IT? CHOOSE 1–${shellCount()}.`
             : `CHOICE ${picked + 1}. LOCKED IN.`
           : reveal
             ? picked === win
               ? "THAT'S RAIDER FOCUS!"
               : `IT\'S UNDER ${win + 1}!`
             : "EYES UP, RAIDER NATION.";
-  banner(
-    main,
-    result
-      ? picked === null
-        ? "WHO CALLED IT?"
-        : picked === win
-          ? "MAKE SOME NOISE!"
-          : "ONE MORE ROUND?"
-      : phase === "ready"
-        ? `${presetName()} CHALLENGE`
-        : phase === "guess"
-          ? "LET THE CROWD DECIDE."
-          : "",
-  );
-  const xs = [390, 800, 1210];
+  banner(main);
+  const { xs, scale: objectScale } = shellLayout();
   // Draw fixed position markers before sorting moving objects back-to-front.
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < xs.length; i++) {
+    ctx.save();
+    ctx.translate(xs[i], 695);
+    ctx.scale(objectScale, 1);
+    ctx.translate(-xs[i], -695);
     const selected =
         picked === i && ["guess", "reveal", "result"].includes(phase),
       correct = result && i === win;
@@ -94,12 +105,13 @@ function drawShell() {
     ctx.stroke();
     rect(xs[i] - 43, 748, 86, 54, correct || selected ? C.red : "#303741", 4);
     text(String(i + 1), xs[i], 776, 29, C.white, "center");
+    ctx.restore();
   }
   const objects = shell.slots.map((id, slot) => ({
     id,
     x: xs[slot],
     y: 0,
-    scale: 1,
+    scale: objectScale,
   }));
   if (phase === "shuffle") {
     const move = shell.moves[shell.index],
@@ -110,7 +122,7 @@ function drawShell() {
       obj.x = xs[src] + (xs[dest] - xs[src]) * e;
       if (dest !== src) {
         obj.y = (dest > src ? -1 : 1) * Math.sin(t * Math.PI) * 60;
-        obj.scale = 1 + obj.y * 0.00065;
+        obj.scale = objectScale * (1 + obj.y * 0.00065);
       }
     });
     rect(630, 315, 340, 3, "#424954");
@@ -128,7 +140,8 @@ function drawShell() {
           : 0;
   if (["show", "cover", "reveal", "result"].includes(phase)) {
     const obj = objects.find((o) => o.id === shell.ball);
-    if (game === "cups") ball(obj.x, 652);
+    if (game === "cups")
+      selectedBall(roundConfig.ball, obj.x, 652, objectScale);
     else football(obj.x - 20, 652, 1.05);
   }
   objects
@@ -137,24 +150,31 @@ function drawShell() {
       ellipse(o.x, 688 + o.y * 0.2, 110 * o.scale, 15, "#0008");
       drawShellObject(o.x, o.y, lift, o.scale);
     });
-  if (result && picked === win) confetti();
+  if (result && (picked === null || picked === win)) confetti();
 }
 
 function gameReset() {
-  shell = { slots: [0, 1, 2], ball: random(3), moves: [], index: 0 };
+  const count = game === "cups" ? prefs.cups.cups : 3;
+  shell = {
+    slots: Array.from({ length: count }, (_, i) => i),
+    ball: random(count),
+    moves: [],
+    index: 0,
+  };
 }
 function gameStart() {
   picked = null;
+  const count = game === "cups" ? roundConfig.cups : 3;
   shell = {
-    slots: [0, 1, 2],
-    ball: random(3),
+    slots: Array.from({ length: count }, (_, i) => i),
+    ball: random(count),
     moves: makeMoves(roundConfig),
     index: 0,
   };
   phaseTo("show");
 }
 function gamePick(index) {
-  if (phase === "guess" && index < 3) {
+  if (phase === "guess" && index < shell.slots.length) {
     picked = index;
     sync();
     ping(450, 0.06);
@@ -204,8 +224,9 @@ function gameDetail() {
 }
 function gameCanvasPick(x, y) {
   if (y > 330 && y < 817) {
-    const i = Math.round((x - 390) / 410);
-    if (i >= 0 && i < 3 && Math.abs(x - (390 + i * 410)) < 180) pick(i);
+    const { xs, scale } = shellLayout();
+    const i = xs.findIndex((cx) => Math.abs(x - cx) < 180 * scale);
+    if (i >= 0) pick(i);
   }
 }
 function gameDraw() {
