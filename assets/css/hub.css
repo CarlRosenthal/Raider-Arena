@@ -1,0 +1,294 @@
+:root {
+  color-scheme: dark;
+  --red: #ed182e;
+  --silver: #b7bec9;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #080a0d;
+  color: #f7f8fa;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  border-top: 6px solid var(--red);
+  background:
+    radial-gradient(ellipse at 90% 0, #50131c66, transparent 45%), #080a0d;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+header,
+main,
+footer {
+  width: min(1200px, calc(100% - 80px));
+  margin: auto;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 29px 0;
+  border-bottom: 1px solid #35383f;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-size: 16px;
+}
+.brand small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  color: var(--silver);
+  margin-top: 6px;
+}
+.monogram {
+  display: grid;
+  place-items: center;
+  width: 47px;
+  height: 47px;
+  background: var(--red);
+  font-size: 36px;
+  font-weight: 900;
+  font-style: italic;
+}
+.tag {
+  border: 1px solid #53565f;
+  padding: 10px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 70px 0 46px;
+  gap: 30px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: var(--silver);
+}
+h1 {
+  font-size: clamp(65px, 9vw, 114px);
+  line-height: 0.88;
+  letter-spacing: -5px;
+  margin: 22px 0 24px;
+  font-weight: 900;
+}
+h1 span {
+  display: block;
+  color: var(--red);
+}
+.lede {
+  color: #c6c9d0;
+  font-size: 17px;
+  line-height: 1.6;
+}
+.season {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-right: 24px;
+}
+.season strong {
+  font-size: 110px;
+  color: #777f8f;
+  font-weight: 900;
+  letter-spacing: -6px;
+}
+.season span {
+  line-height: 1.65;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--silver);
+  font-weight: 700;
+}
+.games {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+.card {
+  border: 1px solid #373c46;
+  background: #13171d;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--red);
+}
+a:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 5px;
+}
+.preview {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+.preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+}
+.number {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #07090ced;
+  padding: 8px 11px;
+  border-left: 3px solid var(--red);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.card-body {
+  padding: 24px 26px;
+}
+.card-body .eyebrow {
+  color: #ff6878;
+  margin: 0 0 12px;
+  font-size: 10px;
+}
+h2 {
+  font-size: 25px;
+  letter-spacing: -0.6px;
+  margin: 0;
+  font-weight: 800;
+}
+.card h2 {
+  display: flex;
+  justify-content: space-between;
+}
+.card h2 span {
+  color: #87909f;
+}
+.card-body > p:not(.eyebrow) {
+  color: #b7bec9;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 12px 0 25px;
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #353b46;
+  padding-top: 16px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.meta span:last-child {
+  color: #ff6878;
+  white-space: nowrap;
+}
+.operator-note {
+  margin: 46px 0 54px;
+  padding: 28px 30px;
+  border-left: 4px solid var(--red);
+  background: #13171d;
+}
+.operator-note .eyebrow {
+  margin-top: 0;
+}
+.operator-note h2 {
+  font-size: 22px;
+}
+.operator-note > p:last-child {
+  color: #b7bec9;
+  line-height: 1.85;
+  font-size: 14px;
+  max-width: 920px;
+  margin-bottom: 0;
+}
+kbd {
+  display: inline-block;
+  font: 700 12px Arial;
+  color: white;
+  background: #333a45;
+  border: 1px solid #515b6b;
+  border-radius: 3px;
+  min-width: 23px;
+  padding: 1px 5px;
+  text-align: center;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid var(--red);
+  padding: 24px 0 30px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #bcc3ce;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  header,
+  main,
+  footer {
+    width: calc(100% - 36px);
+  }
+  header {
+    padding: 20px 0;
+  }
+  .brand {
+    font-size: 12px;
+  }
+  .brand small {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+  .tag {
+    display: none;
+  }
+  .intro {
+    padding: 44px 0 24px;
+  }
+  .season {
+    display: none;
+  }
+  h1 {
+    letter-spacing: -3px;
+  }
+  .lede {
+    font-size: 15px;
+  }
+  .games {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .card-body {
+    padding: 22px;
+  }
+  .operator-note {
+    padding: 22px;
+    margin: 30px 0;
+  }
+  .meta {
+    font-size: 8px;
+  }
+  footer {
+    letter-spacing: 1px;
+    font-size: 8px;
+    gap: 12px;
+  }
+}
