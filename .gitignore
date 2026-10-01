@@ -3,3 +3,7 @@ Thumbs.db
 node_modules/
 test-results/
 __pycache__/
+dist/
+.wrangler/
+.dev.vars*
+.env*

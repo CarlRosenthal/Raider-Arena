@@ -79,7 +79,7 @@ Mouse/touch controls work too. Switching games during play asks before ending th
 | Original logos and hub previews                   | `assets/images/`                                 |
 | Help instructions and script loading order        | Each game HTML page                              |
 
-Edit the desired file in GitHub with the pencil button, then commit the change. Start with a branch and pull request for larger changes. No compile or bundle command is needed. Scripts use ordered `defer` loading and shared globals so local `file://` playback remains available; keep `boot.js` last. Each page loads only its own game implementation, plus the shared files.
+Edit the desired file in GitHub with the pencil button, then commit the change. Start with a branch and pull request for larger changes. No compile or bundle command is needed. Scripts use ordered `defer` loading and shared globals so local `file://` playback remains available; keep game scripts before `boot.js`; the optional `remote-display.js` loads after boot. Each page loads only its own game implementation, plus the shared files.
 
 Settings already saved by a browser override new default presets until the operator chooses a preset again. To see changed defaults, reselect Varsity or clear the site's `raider-arena-v2` localStorage entry.
 
@@ -104,3 +104,9 @@ node tests/smoke.cjs
 Set `BASE_URL` to test a different host or repository subpath. The test harness is only exposed when a game is loaded with `?test`. Normal audience pages do not expose it.
 
 To refresh hub previews after visual changes, run the test with `CAPTURE_PREVIEWS=1`. This flag writes previews in `assets/images/`. There are no production npm dependencies.
+
+## Optional Cloudflare hosting and phone controls
+
+Deploy the same games behind a server-enforced password and pair a mobile operator with a video-board desktop using a short-lived code. See [Cloudflare deployment and operation](docs/CLOUDFLARE.md) for setup, secrets, pairing, recovery, and testing. The Worker and static assets ship together; Durable Objects relay authenticated WebSocket controls.
+
+This is opt-in: merging these files does not deploy Cloudflare or change the existing GitHub Pages site. GitHub Pages remains public until explicitly unpublished. Offline play and local operator popups still work.

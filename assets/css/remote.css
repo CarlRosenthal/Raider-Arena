@@ -1,0 +1,176 @@
+:root {
+  color-scheme: dark;
+  font-family: Arial, system-ui, sans-serif;
+  color: #f7f8fa;
+  background: #090b10;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  border-top: 6px solid #ed182e;
+}
+main {
+  max-width: 780px;
+  margin: auto;
+  padding: 24px;
+}
+header,
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+header {
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+a {
+  color: #e4e9f2;
+}
+h1 {
+  font-size: clamp(32px, 8vw, 52px);
+  margin: 12px 0 28px;
+}
+h2 {
+  font-size: 24px;
+}
+p {
+  line-height: 1.5;
+  color: #bcc6d5;
+}
+.eyebrow {
+  color: #ff5565;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  font-size: 12px;
+}
+section {
+  padding: 22px;
+  border: 1px solid #414653;
+  border-radius: 12px;
+  background: #11151d;
+  margin-bottom: 16px;
+}
+button,
+input,
+select {
+  font: inherit;
+  min-height: 48px;
+  border: 1px solid #626e82;
+  border-radius: 6px;
+  padding: 12px;
+  background: #202837;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+button:disabled,
+select:disabled,
+input:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.primary {
+  background: #da1028;
+  border-color: #ff4358;
+}
+button.active {
+  background: #7d1423;
+  border-color: #ff5669;
+}
+label {
+  display: block;
+  margin: 18px 0 8px;
+}
+select {
+  width: 100%;
+}
+input[type="checkbox"] {
+  min-height: initial;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+input[type="range"] {
+  width: 100%;
+  padding: 0;
+}
+#code {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  width: 100%;
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+#pair-form button {
+  width: 100%;
+}
+#connection {
+  font-weight: bold;
+  color: #f6f8fb;
+}
+#notice {
+  color: #ffb3bb;
+  min-height: 1.5em;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.choices.memory {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.choices button {
+  min-height: 64px;
+}
+details {
+  padding: 18px 0;
+}
+summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.hint {
+  font-size: 14px;
+}
+#disconnect {
+  margin-top: 24px;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+@media (max-width: 480px) {
+  main {
+    padding: 16px;
+  }
+  section {
+    padding: 16px;
+  }
+  .row > button {
+    flex: 1;
+  }
+  header {
+    margin-bottom: 24px;
+  }
+  .choices button {
+    padding: 10px 4px;
+  }
+}

@@ -330,3 +330,7 @@ canvas:focus-visible {
   background: #5e4620;
   opacity: 0.85;
 }
+
+#remote-pairing { max-width: min(92vw, 560px); }
+#remote-pairing a { color: #ff8190; overflow-wrap: anywhere; }
+#remote-pairing .pair-code { font: bold 40px monospace; letter-spacing: .12em; color: white; }
