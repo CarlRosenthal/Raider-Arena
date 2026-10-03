@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Remote Operator | Raider Arena</title>
+    <link rel="icon" href="assets/images/favicon.svg" />
+    <link rel="stylesheet" href="assets/css/remote.css" />
+    <script defer src="assets/js/remote-link.js"></script>
+    <script defer src="assets/js/remote-operator.js"></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="index.html">← Raider Arena</a
+        ><button id="logout">Sign out</button>
+      </header>
+      <p class="eyebrow">YOUR PHONE. YOUR GAME NIGHT.</p>
+      <h1>Remote operator</h1>
+      <section id="pair-panel">
+        <h2>Connect to the board</h2>
+        <p>
+          On the desktop, open a game and select
+          <strong>Connect phone → New pairing code</strong>. Enter its code
+          here.
+        </p>
+        <form id="pair-form">
+          <label for="code">Pairing code</label
+          ><input
+            id="code"
+            name="code"
+            maxlength="9"
+            placeholder="ABCD EFGH"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            required
+          /><button class="primary">Connect</button>
+        </form>
+      </section>
+      <p id="connection" role="status" aria-live="polite">Not connected</p>
+      <p id="notice" role="alert"></p>
+      <section id="console" hidden>
+        <h2 id="game-title"></h2>
+        <p id="game-status" aria-live="polite"></p>
+        <fieldset id="actions" disabled>
+          <div class="row">
+            <button id="advance" class="primary">Start round</button
+            ><button id="pause">Pause</button><button id="reset">Reset</button>
+          </div>
+          <h3 id="choices-label">Choices</h3>
+          <div id="choices" class="choices"></div>
+          <div class="row">
+            <button id="hide">Hide board controls</button
+            ><label><input type="checkbox" id="sound" /> Game sounds</label>
+          </div>
+          <label for="game">Game</label
+          ><select id="game">
+            <option value="cups">Cup Shuffle</option>
+            <option value="race">Raider Rally Race</option>
+            <option value="helmet">Helmet Shuffle</option>
+            <option value="memory">Memory Match</option></select
+          ><label for="preset">Difficulty / race pace</label
+          ><select id="preset">
+            <option value="warmup">Warm-up</option>
+            <option value="varsity">Varsity</option>
+            <option value="allstar">All-Star</option>
+            <option value="elite">Elite</option>
+            <option value="insane">Insane</option>
+            <option value="impossible">Impossible</option>
+            <option value="custom" disabled>Custom</option>
+          </select>
+          <details>
+            <summary>Tuning</summary>
+            <div id="settings"></div>
+          </details>
+        </fieldset>
+        <button id="disconnect">Disconnect this phone</button>
+        <p class="hint">
+          The desktop runs the game. Keep its tab visible. A connection loss
+          pauses active play; reconnect and tap Resume. Fullscreen and audio
+          activation require a click on the desktop.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

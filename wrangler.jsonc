@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "raider-arena",
+  "main": "worker/index.mjs",
+  "compatibility_date": "2026-07-30",
+  // Cloudflare Builds invokes Wrangler directly, including for PR previews.
+  "build": { "command": "npm run build" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "none",
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOMS", "class_name": "ArenaRoom" },
+      { "name": "AUTH", "class_name": "AuthGuard" },
+    ],
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["ArenaRoom", "AuthGuard"] },
+  ],
+  // Preview bindings are not inherited from production. Cloudflare isolates
+  // these namespaces per preview; assets and migrations stay at the top level.
+  "previews": {
+    "durable_objects": {
+      "bindings": [
+        { "name": "ROOMS", "class_name": "ArenaRoom" },
+        { "name": "AUTH", "class_name": "AuthGuard" },
+      ],
+    },
+  },
+}
