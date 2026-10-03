@@ -109,4 +109,4 @@ To refresh hub previews after visual changes, run the test with `CAPTURE_PREVIEW
 
 Deploy the same games behind a server-enforced password and pair a mobile operator with a video-board desktop using a short-lived code. See [Cloudflare deployment and operation](docs/CLOUDFLARE.md) for setup, secrets, pairing, recovery, and testing. The Worker and static assets ship together; Durable Objects relay authenticated WebSocket controls.
 
-This is opt-in: merging these files does not deploy Cloudflare or change the existing GitHub Pages site. GitHub Pages remains public until explicitly unpublished. Offline play and local operator popups still work.
+This is opt-in: merging these files does not deploy Cloudflare or change the existing GitHub Pages site.
