@@ -17,6 +17,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Remove generated assets to check a fresh Cloudflare build
+        run: node -e 'require("node:fs").rmSync("dist", { recursive: true, force: true })'
       - run: npm run check:deploy
       - run: npx playwright install --with-deps chromium
       - run: npm run test:remote

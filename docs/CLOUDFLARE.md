@@ -26,9 +26,42 @@ This is an optional deployment path. Merging this PR does not deploy a Worker, c
 6. Open the HTTPS `workers.dev` address printed by Wrangler. Verify an incognito window sees the login form, including when opening a game or asset URL directly.
 7. Optionally add a custom domain in Cloudflare's Worker settings. Both devices must use the **same origin**. No cross-origin API configuration is needed.
 
-`npm run build` copies only the game pages, operator page, and `assets/` to `dist/`. Repository files, tests, `.dev.vars`, and Worker source are excluded. `run_worker_first: true` is required: changing it can bypass authentication for static assets. HTTPS and the secure session cookie are required in production.
+`npm run build` copies only the game pages, operator page, and `assets/` to `dist/`. Repository files, tests, `.dev.vars`, and Worker source are excluded. Wrangler runs this build automatically through `build.command`, including when Cloudflare invokes `npx wrangler deploy` or `npx wrangler preview` directly on a fresh checkout. `run_worker_first: true` is required: changing it can bypass authentication for static assets. HTTPS and the secure session cookie are required in production.
 
-After deployment, Cloudflare's Git integration can build with `npm run build` and deploy with `npx wrangler deploy`. Configure the secrets in Cloudflare first. No automatic deployment workflow or account ID is committed in this PR. Review your account's current Workers/Durable Objects limits and usage before regular events; connections, messages and authentication checks consume Cloudflare resources.
+## Cloudflare Git builds and pull-request previews
+
+In the Worker's **Settings → Builds**, use the repository root and these settings:
+
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Build command | Leave empty; Wrangler runs `npm run build` automatically |
+| Deploy command | `npx wrangler deploy` |
+| Preview command | `npx wrangler preview` |
+
+An existing build command of `npm run build` also works, but runs the asset copy twice. The equivalent local commands are `npm run deploy` and `npm run preview`. Preview support requires Wrangler 4.135.0 or later; the repository pins a supported version. Keep the preview command for PR builds so they deploy to an isolated Preview.
+
+The `previews` block in `wrangler.jsonc` explicitly provides `ROOMS` and `AUTH`, because production bindings are not inherited. Cloudflare creates separate Durable Object namespaces and storage for each Preview. Assets, compatibility settings, and class migrations remain at the top level.
+
+**Preview secrets are separate from production secrets.** Before creating the first Preview, set these interactively from the repository with Wrangler signed in:
+
+```sh
+npx wrangler preview base-config secret put SITE_PASSWORD
+npx wrangler preview base-config secret put SESSION_SECRET
+```
+
+Use a test password of 12–256 characters and a separate random signing secret of at least 32 characters. New Previews receive these Base secrets when created. To configure a Preview that already exists, set both on that Preview instead (Base changes do not update existing Previews):
+
+```sh
+npx wrangler preview secret put SITE_PASSWORD --name feature/cloudflare-remote-operator
+npx wrangler preview secret put SESSION_SECRET --name feature/cloudflare-remote-operator
+```
+
+These are runtime secrets, not plaintext build variables. Production still needs its own `SITE_PASSWORD` and `SESSION_SECRET` configured through the First deployment steps. A build can succeed without secrets, but the site deliberately returns a configuration error until both are present and valid.
+
+If a PR build fails, inspect the log after `Executing user deploy command`. A missing `previews` block prevents preview deployment; a missing `dist/` directory means the asset build did not run. Both are configured in this repository. The `allow-scripts` lines during dependency installation are warnings and are not themselves a fatal error. If the log later reports a missing native binary, inspect that separate error before changing script approvals.
+
+Review your account's current Workers/Durable Objects limits and usage before regular events; connections, messages and authentication checks consume Cloudflare resources. No deployment credentials or account ID are committed in this PR.
 
 ## Pair a video-board desktop with a phone
 
@@ -79,4 +112,7 @@ Rehearse the final HTTPS deployment with the real desktop, video board, and phon
 
 - https://developers.cloudflare.com/workers/static-assets/routing/worker-script/
 - https://developers.cloudflare.com/workers/configuration/secrets/
+- https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
+- https://developers.cloudflare.com/workers/previews/configuration/
+- https://developers.cloudflare.com/workers/wrangler/custom-builds/
 - https://developers.cloudflare.com/durable-objects/examples/websocket-hibernation-server/
